@@ -64,6 +64,6 @@ class MyTest {
 <dependency>
     <groupId>com.github.swierkosz</groupId>
     <artifactId>fixture-generator</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
