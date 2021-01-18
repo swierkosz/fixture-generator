@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -180,6 +181,71 @@ class ClassInspectorTest {
     }
 
     private static class GenericClassWithInheritance<Z> extends GenericClass<Z> {
+    }
+
+    @Test
+    void shouldListConstructorsForClassWithDefaultConstructor() throws Exception {
+        // When
+        List<ConstructorInformation> result = classInspector.listConstructorsFor(typeInformation(ClassWithDefaultConstructor.class));
+
+        // Then
+        assertThat(result).hasSize(1);
+        ConstructorInformation constructorInformation = result.get(0);
+        assertThat(constructorInformation.getParameterTypes()).isEmpty();
+
+        // Given
+        constructorInformation.getConstructor().setAccessible(true);
+
+        // When
+        Object instance = constructorInformation.getConstructor().newInstance();
+
+        // Then
+        assertThat(instance).isInstanceOf(ClassWithDefaultConstructor.class);
+    }
+
+    private static class ClassWithDefaultConstructor {
+        int intField;
+    }
+
+    @ParameterizedTest
+    @MethodSource("shouldListConstructorsForClassWithoutDefaultConstructorSource")
+    void shouldListConstructorsForClassWithoutDefaultConstructor(TypeInformation typeInformation) {
+        // When
+        List<ConstructorInformation> result = classInspector.listConstructorsFor(typeInformation);
+
+        // Then
+        assertThat(result).hasSize(1);
+        ConstructorInformation constructorInformation = result.get(0);
+        List<TypeInformation> parameterTypes = constructorInformation.getParameterTypes();
+        assertThat(parameterTypes).hasSize(3);
+        assertThat(parameterTypes.get(0)).isEqualTo(typeInformation(int.class));
+        assertThat(parameterTypes.get(1)).isEqualTo(typeInformation(String.class));
+        assertThat(parameterTypes.get(2)).isEqualTo(typeInformation(Set.class, typeInformation(String.class)));
+    }
+
+    static Stream<Arguments> shouldListConstructorsForClassWithoutDefaultConstructorSource() {
+        return Stream.of(
+                Arguments.of(typeInformation(ClassWithoutDefaultConstructor.class)),
+                Arguments.of(typeInformation(BaseClassWithoutDefaultConstructor.class, typeInformation(String.class)))
+        );
+    }
+
+    private static class ClassWithoutDefaultConstructor extends BaseClassWithoutDefaultConstructor<String> {
+        public ClassWithoutDefaultConstructor(int intField, String stringField, Set<String> setField) {
+            super(intField, stringField, setField);
+        }
+    }
+
+    private static class BaseClassWithoutDefaultConstructor<T> {
+        final int intField;
+        final String stringField;
+        final Set<T> setField;
+
+        public BaseClassWithoutDefaultConstructor(int intField, String stringField, Set<T> setField) {
+            this.intField = intField;
+            this.stringField = stringField;
+            this.setField = setField;
+        }
     }
 
     private static Map<String, FieldInformation> toMap(Collection<FieldInformation> set) {
