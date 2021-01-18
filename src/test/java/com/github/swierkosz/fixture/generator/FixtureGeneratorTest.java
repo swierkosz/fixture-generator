@@ -455,6 +455,54 @@ class FixtureGeneratorTest {
     }
 
     @Test
+    void shouldCreateDeterministicTestClassWithFinalFieldsAndWithoutDefaultConstructor() {
+        // When
+        TestClassWithFinalFieldsAndWithoutDefaultConstructor result = fixtureGenerator.createDeterministic(TestClassWithFinalFieldsAndWithoutDefaultConstructor.class);
+
+        // Then
+        assertThat(result.intField).isEqualTo(303335902);
+        assertThat(result.stringField).isEqualTo("stringField-09568fd4-7072-3c1d-81dd-f383836cc584");
+        assertThat(result.setField).containsExactly(652111919, -2012151326, 237287371);
+    }
+
+    private static class TestClassWithFinalFieldsAndWithoutDefaultConstructor {
+        final int intField;
+        final String stringField;
+        final Set<Integer> setField;
+
+        private TestClassWithFinalFieldsAndWithoutDefaultConstructor(int intField, String stringField, Set<Integer> setField) {
+            this.intField = intField;
+            this.stringField = stringField;
+            this.setField = setField;
+        }
+    }
+
+    @Test
+    void shouldCreateDeterministicTestClassWithoutDefaultConstructor() {
+        // When
+        TestClassWithoutDefaultConstructor result = fixtureGenerator.createDeterministic(TestClassWithoutDefaultConstructor.class);
+
+        // Then
+        assertThat(result.testField.list).containsExactly(858912947, -709195832, -1953750246);
+    }
+
+    private static class TestClassWithoutDefaultConstructor {
+        final TestClassWithGenericsAndWithoutDefaultConstructor<Integer> testField;
+
+        private TestClassWithoutDefaultConstructor(TestClassWithGenericsAndWithoutDefaultConstructor<Integer> testField) {
+            this.testField = testField;
+        }
+    }
+
+    private static class TestClassWithGenericsAndWithoutDefaultConstructor<T> {
+        final List<T> list;
+
+        private TestClassWithGenericsAndWithoutDefaultConstructor(List<T> list) {
+            this.list = list;
+        }
+    }
+
+    @Test
     void shouldThrowExceptionForTestClassWithCyclicReferenceA() {
         // When
         Throwable throwable = catchThrowable(() -> fixtureGenerator.createDeterministic(TestClassWithCyclicReferenceA.class));

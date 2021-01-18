@@ -18,6 +18,7 @@ package com.github.swierkosz.fixture.generator.reflection;
 import com.github.swierkosz.fixture.generator.TypeInformation;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -36,18 +37,9 @@ public class ClassInspector {
 
     public List<FieldInformation> listFieldsFor(TypeInformation typeInformation) {
         List<FieldInformation> fields = new ArrayList<>();
+        Map<TypeVariable<?>, TypeInformation> mapping = createMappingForTypeInformation(typeInformation);
+
         Type type = typeInformation.getRawType();
-
-        Map<TypeVariable<?>, TypeInformation> mapping = new HashMap<>();
-        if (!typeInformation.getTypeParameters().isEmpty()) {
-            TypeVariable<? extends Class<?>>[] typeVariables = typeInformation.getRawType().getTypeParameters();
-            int i = 0;
-            for (TypeInformation typeParameter : typeInformation.getTypeParameters()) {
-                mapping.put(typeVariables[i], typeParameter);
-                i++;
-            }
-        }
-
         while (!Object.class.equals(type)) {
             Class<?> currentClass;
 
@@ -85,6 +77,35 @@ public class ClassInspector {
         }
 
         return fields;
+    }
+
+    public List<ConstructorInformation> listConstructorsFor(TypeInformation typeInformation) {
+        Map<TypeVariable<?>, TypeInformation> mapping = createMappingForTypeInformation(typeInformation);
+
+        Constructor<?>[] constructors = typeInformation.getRawType().getDeclaredConstructors();
+        List<ConstructorInformation> result = new ArrayList<>(constructors.length);
+        for (Constructor<?> constructor : constructors) {
+            List<TypeInformation> parameterTypes = new ArrayList<>(constructor.getParameterCount());
+            for (Type parameterType : constructor.getGenericParameterTypes()) {
+                parameterTypes.add(resolve(parameterType, mapping));
+            }
+            result.add(new ConstructorInformation(constructor, parameterTypes));
+        }
+
+        return result;
+    }
+
+    private static Map<TypeVariable<?>, TypeInformation> createMappingForTypeInformation(TypeInformation typeInformation) {
+        Map<TypeVariable<?>, TypeInformation> mapping = new HashMap<>();
+        if (!typeInformation.getTypeParameters().isEmpty()) {
+            TypeVariable<? extends Class<?>>[] typeVariables = typeInformation.getRawType().getTypeParameters();
+            int i = 0;
+            for (TypeInformation typeParameter : typeInformation.getTypeParameters()) {
+                mapping.put(typeVariables[i], typeParameter);
+                i++;
+            }
+        }
+        return mapping;
     }
 
     private static TypeInformation resolve(Type type, Map<TypeVariable<?>, TypeInformation> mapping) {

@@ -19,11 +19,13 @@ import com.github.swierkosz.fixture.generator.TypeInformation;
 import com.github.swierkosz.fixture.generator.ValueContext;
 import com.github.swierkosz.fixture.generator.ValueGenerator;
 import com.github.swierkosz.fixture.generator.reflection.ClassInspector;
+import com.github.swierkosz.fixture.generator.reflection.ConstructorInformation;
 import com.github.swierkosz.fixture.generator.reflection.FieldInformation;
 
-import static com.github.swierkosz.fixture.generator.reflection.ReflectionUtils.createUsingDefaultConstructor;
+import java.util.List;
+
 import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
-import static java.lang.reflect.Modifier.isAbstract;
+import static java.util.Comparator.comparing;
 
 public class ConstructingValueGenerator implements ValueGenerator {
 
@@ -32,11 +34,8 @@ public class ConstructingValueGenerator implements ValueGenerator {
     @Override
     public Object generateValue(ValueContext valueContext) {
         TypeInformation type = valueContext.getType();
-        if (isAbstract(type.getRawType().getModifiers())) {
-            return NO_VALUE;
-        }
 
-        Object result = createUsingDefaultConstructor(type.getRawType());
+        Object result = create(type, valueContext);
         if (result == null) {
             return NO_VALUE;
         }
@@ -48,4 +47,25 @@ public class ConstructingValueGenerator implements ValueGenerator {
         return result;
     }
 
+    private Object create(TypeInformation typeInformation, ValueContext valueContext) {
+        List<ConstructorInformation> constructors = classInspector.listConstructorsFor(typeInformation);
+        constructors.sort(comparing(item -> item.getParameterTypes().size()));
+        for (ConstructorInformation constructor : constructors) {
+            try {
+                List<TypeInformation> parameterTypes = constructor.getParameterTypes();
+                Object[] args = new Object[parameterTypes.size()];
+                int index = 0;
+                for (TypeInformation parameterType : parameterTypes) {
+                    args[index] = valueContext.create(null, parameterType);
+                    index++;
+                }
+
+                constructor.getConstructor().setAccessible(true);
+                return constructor.getConstructor().newInstance(args);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return null;
+    }
 }
