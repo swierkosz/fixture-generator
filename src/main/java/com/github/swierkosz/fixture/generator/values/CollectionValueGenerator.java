@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -67,7 +67,8 @@ public class CollectionValueGenerator implements ValueGenerator {
             collection = new LinkedList<>();
 
         } else if (Collection.class.isAssignableFrom(type.getRawType())) {
-            collection = tryToCreate(type.getRawType());
+            //noinspection unchecked
+            collection = (Collection<Object>) createUsingDefaultConstructor(type.getRawType());
 
         } else {
             collection = null;
@@ -79,13 +80,5 @@ public class CollectionValueGenerator implements ValueGenerator {
 
         collection.addAll(valueContext.createCollection(valueContext.getFieldName(), type.getTypeParameters().get(0)));
         return collection;
-    }
-
-    private Collection<Object> tryToCreate(Class<?> type) {
-        try {
-            return (Collection) createUsingDefaultConstructor(type);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

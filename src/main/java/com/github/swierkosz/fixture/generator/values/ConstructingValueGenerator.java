@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class ConstructingValueGenerator implements ValueGenerator {
             return NO_VALUE;
         }
 
-        Object result = create(type.getRawType());
+        Object result = createUsingDefaultConstructor(type.getRawType());
         if (result == null) {
             return NO_VALUE;
         }
@@ -48,11 +48,4 @@ public class ConstructingValueGenerator implements ValueGenerator {
         return result;
     }
 
-    private static Object create(Class<?> type) {
-        try {
-            return createUsingDefaultConstructor(type);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -51,7 +51,8 @@ public class MapValueGenerator implements ValueGenerator {
             map = new TreeMap<>();
 
         } else if (Map.class.isAssignableFrom(type.getRawType())) {
-            map = tryToCreate(type.getRawType());
+            //noinspection unchecked
+            map = (Map<Object, Object>) createUsingDefaultConstructor(type.getRawType());
 
         } else {
             map = null;
@@ -72,13 +73,5 @@ public class MapValueGenerator implements ValueGenerator {
         }
 
         return map;
-    }
-
-    private Map<Object, Object> tryToCreate(Class<?> type) {
-        try {
-            return (Map) createUsingDefaultConstructor(type);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }
