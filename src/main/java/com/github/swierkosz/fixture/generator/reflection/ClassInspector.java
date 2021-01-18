@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.reflection;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,10 +25,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.github.swierkosz.fixture.generator.reflection.ReflectionUtils.setValue;
 import static java.lang.reflect.Modifier.isStatic;
@@ -36,12 +34,22 @@ import static java.util.Collections.singletonList;
 
 public class ClassInspector {
 
-    public Set<FieldInformation> listFieldsFor(Type type) {
-        Set<FieldInformation> fields = new HashSet<>();
+    public List<FieldInformation> listFieldsFor(TypeInformation typeInformation) {
+        List<FieldInformation> fields = new ArrayList<>();
+        Type type = typeInformation.getRawType();
+
+        Map<TypeVariable<?>, TypeInformation> mapping = new HashMap<>();
+        if (!typeInformation.getTypeParameters().isEmpty()) {
+            TypeVariable<? extends Class<?>>[] typeVariables = typeInformation.getRawType().getTypeParameters();
+            int i = 0;
+            for (TypeInformation typeParameter : typeInformation.getTypeParameters()) {
+                mapping.put(typeVariables[i], typeParameter);
+                i++;
+            }
+        }
 
         while (!Object.class.equals(type)) {
             Class<?> currentClass;
-            Map<TypeVariable<?>, Type> currentClassParameters = new HashMap<>();
 
             if (type instanceof Class) {
                 currentClass = (Class<?>) type;
@@ -50,11 +58,10 @@ public class ClassInspector {
                 currentClass = (Class<?>) parameterizedType.getRawType();
 
                 TypeVariable<?>[] typeParameters = currentClass.getTypeParameters();
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-                int i = 0;
-                for (Type typeArgument : parameterizedType.getActualTypeArguments()) {
-                    currentClassParameters.put(typeParameters[i], typeArgument);
-                    i++;
+                for (int i = 0; i < actualTypeArguments.length; i++) {
+                    mapping.put(typeParameters[i], resolve(actualTypeArguments[i], mapping));
                 }
             } else {
                 throw new UnableToResolveTypeException("Unable to resolve type: " + type.getTypeName());
@@ -69,7 +76,7 @@ public class ClassInspector {
                 FieldInformation fieldInformation = new FieldInformation(
                         field.getName(),
                         (target, value) -> setValue(target, field, value),
-                        resolve(field.getGenericType(), currentClassParameters));
+                        resolve(field.getGenericType(), mapping));
 
                 fields.add(fieldInformation);
             }
@@ -80,7 +87,7 @@ public class ClassInspector {
         return fields;
     }
 
-    private static TypeInformation resolve(Type type, Map<TypeVariable<?>, Type> mapping) {
+    private static TypeInformation resolve(Type type, Map<TypeVariable<?>, TypeInformation> mapping) {
         if (type instanceof Class<?>) {
             return resolveClass((Class<?>) type, mapping);
         } else if (type instanceof ParameterizedType) {
@@ -88,13 +95,13 @@ public class ClassInspector {
         } else if (type instanceof GenericArrayType) {
             return resolveGenericArrayType((GenericArrayType) type, mapping);
         } else if (type instanceof TypeVariable && mapping.containsKey(type)) {
-            return resolve(mapping.get(type), mapping);
+            return mapping.get(type);
         } else {
             throw new UnableToResolveTypeException("Unable to resolve type: " + type.getTypeName());
         }
     }
 
-    private static TypeInformation resolveClass(Class<?> aClass, Map<TypeVariable<?>, Type> mapping) {
+    private static TypeInformation resolveClass(Class<?> aClass, Map<TypeVariable<?>, TypeInformation> mapping) {
         if (aClass.isArray()) {
             List<TypeInformation> typeParameters = new ArrayList<>();
             typeParameters.add(resolve(aClass.getComponentType(), mapping));
@@ -104,7 +111,7 @@ public class ClassInspector {
         }
     }
 
-    private static TypeInformation resolveParametrizedType(ParameterizedType parameterizedType, Map<TypeVariable<?>, Type> mapping) {
+    private static TypeInformation resolveParametrizedType(ParameterizedType parameterizedType, Map<TypeVariable<?>, TypeInformation> mapping) {
         List<TypeInformation> typeParameters = new ArrayList<>();
         for (Type actualTypeArgument : parameterizedType.getActualTypeArguments()) {
             typeParameters.add(resolve(actualTypeArgument, mapping));
@@ -112,9 +119,8 @@ public class ClassInspector {
         return new TypeInformationImpl((Class<?>) parameterizedType.getRawType(), typeParameters);
     }
 
-    private static TypeInformation resolveGenericArrayType(GenericArrayType genericArrayType, Map<TypeVariable<?>, Type> mapping) {
+    private static TypeInformation resolveGenericArrayType(GenericArrayType genericArrayType, Map<TypeVariable<?>, TypeInformation> mapping) {
         TypeInformation componentType = resolve(genericArrayType.getGenericComponentType(), mapping);
-        // TODO: Is there a better way to obtain this?
         Class<?> arrayClass = Array.newInstance(componentType.getRawType(), 0).getClass();
         return new TypeInformationImpl(arrayClass, singletonList(componentType));
     }
