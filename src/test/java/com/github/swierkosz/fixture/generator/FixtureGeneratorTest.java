@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -387,6 +387,32 @@ class FixtureGeneratorTest {
         LinkedHashMap<K, V> linkedHashMap;
         Hashtable<K, V> hashtable;
         TreeMap<K, V> treeMap;
+    }
+
+    @Test
+    void shouldCreateDeterministicTestClassWithDeepGenerics() {
+        // When
+        TestClassWithDeepGenerics result = fixtureGenerator.createDeterministic(TestClassWithDeepGenerics.class);
+
+        // Then
+        assertThat(result.inner.field1).isEqualTo(-1455021897);
+        assertThat(result.inner.field2).containsExactly(1199802702, 1234106591, -550836707);
+        assertThat(result.inner.field3).containsExactly(-939938044, -456008426, 1365986789);
+        assertThat(result.inner.field4).isEqualTo(-1390768830);
+    }
+
+    private static class TestClassWithDeepGenerics {
+        TestClassWithDeepGenericsInner2<Set<Integer>, Integer> inner;
+    }
+
+    private static class TestClassWithDeepGenericsInner2<A, B> extends TestClassWithDeepGenericsInner1<B, A> {
+        A field3;
+        B field4;
+    }
+
+    private static class TestClassWithDeepGenericsInner1<A, B> {
+        A field1;
+        B field2;
     }
 
     @Test

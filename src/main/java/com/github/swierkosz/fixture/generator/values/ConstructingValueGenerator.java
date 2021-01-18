@@ -41,7 +41,7 @@ public class ConstructingValueGenerator implements ValueGenerator {
             return NO_VALUE;
         }
 
-        for (FieldInformation field : classInspector.listFieldsFor(type.getRawType())) {
+        for (FieldInformation field : classInspector.listFieldsFor(type)) {
             field.getSetter().accept(result, valueContext.create(field.getName(), field.getType()));
         }
 

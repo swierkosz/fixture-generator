@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.reflection;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2021 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@ import com.github.swierkosz.fixture.generator.TypeInformation;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +37,7 @@ class ClassInspectorTest {
     @Test
     void shouldListFieldsForSimpleClass() {
         // When
-        Set<FieldInformation> result = classInspector.listFieldsFor(SimpleClass.class);
+        List<FieldInformation> result = classInspector.listFieldsFor(typeInformation(SimpleClass.class));
 
         // Then
         Map<String, FieldInformation> resultMap = toMap(result);
@@ -55,7 +59,7 @@ class ClassInspectorTest {
     @Test
     void shouldIgnoreStaticFields() {
         // When
-        Set<FieldInformation> result = classInspector.listFieldsFor(SimpleClassWithStaticField.class);
+        List<FieldInformation> result = classInspector.listFieldsFor(typeInformation(SimpleClassWithStaticField.class));
 
         // Then
         Map<String, FieldInformation> resultMap = toMap(result);
@@ -73,7 +77,7 @@ class ClassInspectorTest {
     @Test
     void shouldListFieldsForClassWithInheritance() {
         // When
-        Set<FieldInformation> result = classInspector.listFieldsFor(ClassWithInheritance.class);
+        List<FieldInformation> result = classInspector.listFieldsFor(typeInformation(ClassWithInheritance.class));
 
         // Then
         Map<String, FieldInformation> resultMap = toMap(result);
@@ -98,7 +102,7 @@ class ClassInspectorTest {
     @Test
     void shouldListFieldsForClassWithConcreteArray() {
         // When
-        Set<FieldInformation> result = classInspector.listFieldsFor(ClassWithConcreteArray.class);
+        List<FieldInformation> result = classInspector.listFieldsFor(typeInformation(ClassWithConcreteArray.class));
 
         // Then
         Map<String, FieldInformation> resultMap = toMap(result);
@@ -122,10 +126,11 @@ class ClassInspectorTest {
         String[][] string2dArrayField;
     }
 
-    @Test
-    void shouldListFieldsForSpecializedClassWithGenerics() {
+    @ParameterizedTest
+    @MethodSource("shouldListFieldsForClassWithGenericsSource")
+    void shouldListFieldsForClassWithGenerics(TypeInformation typeInformation) {
         // When
-        Set<FieldInformation> result = classInspector.listFieldsFor(SpecializedClass.class);
+        List<FieldInformation> result = classInspector.listFieldsFor(typeInformation);
 
         // Then
         Map<String, FieldInformation> resultMap = toMap(result);
@@ -155,6 +160,14 @@ class ClassInspectorTest {
         assertThat(mapFieldInformation.getSetter()).isNotNull();
     }
 
+    static Stream<Arguments> shouldListFieldsForClassWithGenericsSource() {
+        return Stream.of(
+                Arguments.of(typeInformation(SpecializedClass.class)),
+                Arguments.of(typeInformation(GenericClass.class, typeInformation(Integer.class))),
+                Arguments.of(typeInformation(GenericClassWithInheritance.class, typeInformation(Integer.class)))
+        );
+    }
+
     private static class SpecializedClass extends GenericClass<Integer> {
     }
 
@@ -166,7 +179,10 @@ class ClassInspectorTest {
         Map<List<T[]>, T> mapField;
     }
 
-    private static Map<String, FieldInformation> toMap(Set<FieldInformation> set) {
+    private static class GenericClassWithInheritance<Z> extends GenericClass<Z> {
+    }
+
+    private static Map<String, FieldInformation> toMap(Collection<FieldInformation> set) {
         return Maps.uniqueIndex(set, FieldInformation::getName);
     }
 
