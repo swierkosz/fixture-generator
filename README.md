@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MyTest {
+class Usage {
 
     @Test
     void shouldDemonstrateFixtureGenerator() {
@@ -36,12 +36,13 @@ class MyTest {
     @Test
     void shouldDemonstrateFixtureGeneratorWithConfiguration() {
         // Given
-        FixtureGenerator fixtureGenerator = new FixtureGenerator();
-        fixtureGenerator.configure()
+        FixtureGenerator fixtureGenerator = new FixtureGenerator()
+                .configure()
                 // Intercept and modify fields
                 .intercept(Pojo.class, value -> value.intField = 1234)
                 // Intercept and transform the value
-                .transform(String.class, value -> value.substring(0, 10));
+                .transform(String.class, value -> value.substring(0, 10))
+                .done();
 
         // When
         Pojo result = fixtureGenerator.createDeterministic(Pojo.class);
@@ -64,6 +65,6 @@ class MyTest {
 <dependency>
     <groupId>com.github.swierkosz</groupId>
     <artifactId>fixture-generator</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```

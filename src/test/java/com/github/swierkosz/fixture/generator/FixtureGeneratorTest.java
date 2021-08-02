@@ -607,4 +607,13 @@ class FixtureGeneratorTest {
         assertThat(values).hasSizeGreaterThan(1);
     }
 
+    @Test
+    void shouldConfigureFluently() {
+        // When
+        FixtureGenerator result = fixtureGenerator.configure()
+                .done();
+
+        // Then
+        assertThat(result).isSameAs(fixtureGenerator);
+    }
 }

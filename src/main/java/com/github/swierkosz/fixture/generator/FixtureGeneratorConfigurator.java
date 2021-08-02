@@ -23,9 +23,11 @@ import java.util.function.Function;
  */
 public class FixtureGeneratorConfigurator {
 
+    private final FixtureGenerator fixtureGenerator;
     private final FixtureGeneratorConfiguration configuration;
 
-    protected FixtureGeneratorConfigurator(FixtureGeneratorConfiguration configuration) {
+    protected FixtureGeneratorConfigurator(FixtureGenerator fixtureGenerator, FixtureGeneratorConfiguration configuration) {
+        this.fixtureGenerator = fixtureGenerator;
         this.configuration = configuration;
     }
 
@@ -73,22 +75,63 @@ public class FixtureGeneratorConfigurator {
         return this;
     }
 
+    /**
+     * Registers a typed interceptor that will be called for every generated object of equal type.
+     * Allows performing additional post-processing after object is generated.
+     *
+     * @param type        Specifies type of the object to intercept.
+     * @param interceptor The interceptor to be called.
+     * @param <T>         Type of the object to intercept.
+     * @return configurator
+     */
     public <T> FixtureGeneratorConfigurator intercept(Class<T> type, Consumer<T> interceptor) {
         return intercept(new TypedInterceptor<>(type, interceptor));
     }
 
+    /**
+     * Registers an untyped interceptor that will be called for every generated object.
+     * Allows performing additional post-processing after object is generated.
+     *
+     * @param interceptor The interceptor to be called.
+     * @return configurator
+     */
     public FixtureGeneratorConfigurator intercept(Consumer<Object> interceptor) {
         configuration.addInterceptor(interceptor);
         return this;
     }
 
+    /**
+     * Registers a typed transformer that will be called for every generated object of equal type.
+     * Allows performing in-place substitution after object is generated.
+     *
+     * @param type        Specifies type of the object to intercept.
+     * @param transformer The transformer to be called.
+     * @param <T>         Type of the object to transform.
+     * @return configurator
+     */
     public <T, U extends T> FixtureGeneratorConfigurator transform(Class<T> type, Function<T, U> transformer) {
         return transform(new TypedTransformer<>(type, transformer));
     }
 
+    /**
+     * Registers an untyped transformer that will be called for every generated object.
+     * Allows performing in-place substitution after object is generated.
+     *
+     * @param transformer The transformer to be called.
+     * @return configurator
+     */
     public FixtureGeneratorConfigurator transform(Function<Object, Object> transformer) {
         configuration.addTransformer(transformer);
         return this;
+    }
+
+    /**
+     * Method for fluently finishing configuring of fixture generator.
+     *
+     * @return fixtureGenerator
+     */
+    public FixtureGenerator done() {
+        return fixtureGenerator;
     }
 
     private static class TypedTransformer<T, U extends T> implements Function<Object, Object> {

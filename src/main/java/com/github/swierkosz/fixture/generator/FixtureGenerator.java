@@ -31,7 +31,7 @@ public class FixtureGenerator {
      * @return A configurator class.
      */
     public FixtureGeneratorConfigurator configure() {
-        return new FixtureGeneratorConfigurator(configuration);
+        return new FixtureGeneratorConfigurator(this, configuration);
     }
 
     /**
