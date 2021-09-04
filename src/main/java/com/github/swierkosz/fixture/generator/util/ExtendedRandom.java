@@ -35,6 +35,9 @@ public class ExtendedRandom extends Random {
     }
 
     public <T> T randomOneOf(Collection<T> collection) {
+        if (collection.isEmpty()) {
+            throw new IllegalArgumentException("Empty collection");
+        }
         return collection.stream()
                 .skip(Math.abs(nextInt()) % collection.size())
                 .findFirst()

@@ -17,12 +17,14 @@ package com.github.swierkosz.fixture.generator.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 class ExtendedRandomTest {
 
@@ -47,6 +49,18 @@ class ExtendedRandomTest {
     }
 
     @Test
+    void shouldThrowExceptionForRandomOneOfEmptyArray() {
+        // Given
+        Long[] emptyArray = new Long[0];
+
+        // When
+        Throwable throwable = catchThrowable(() -> extendedRandom.randomOneOf(emptyArray));
+
+        // Then
+        assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void shouldReturnRandomOneOfCollection() {
         // Given
         Collection<Integer> collection = Arrays.asList(0, 1, 2);
@@ -62,6 +76,18 @@ class ExtendedRandomTest {
 
         // Then
         assertThat(results).containsOnlyOnceElementsOf(collection);
+    }
+
+    @Test
+    void shouldThrowExceptionForRandomOneOfEmptyCollection() {
+        // Given
+        Collection<Long> emptyCollection = new ArrayList<>();
+
+        // When
+        Throwable throwable = catchThrowable(() -> extendedRandom.randomOneOf(emptyCollection));
+
+        // Then
+        assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
