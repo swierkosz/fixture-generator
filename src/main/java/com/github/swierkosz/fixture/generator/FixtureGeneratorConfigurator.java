@@ -85,7 +85,7 @@ public class FixtureGeneratorConfigurator {
      * @return configurator
      */
     public <T> FixtureGeneratorConfigurator intercept(Class<T> type, Consumer<T> interceptor) {
-        return intercept(new TypedInterceptor<>(type, interceptor));
+        return transform(new TypedInterceptor<>(type, interceptor));
     }
 
     /**
@@ -96,8 +96,7 @@ public class FixtureGeneratorConfigurator {
      * @return configurator
      */
     public FixtureGeneratorConfigurator intercept(Consumer<Object> interceptor) {
-        configuration.addInterceptor(interceptor);
-        return this;
+        return transform(new UntypedInterceptor(interceptor));
     }
 
     /**
@@ -154,7 +153,7 @@ public class FixtureGeneratorConfigurator {
         }
     }
 
-    private static class TypedInterceptor<T> implements Consumer<Object> {
+    private static class TypedInterceptor<T> implements Function<Object, Object> {
 
         private final Class<T> type;
         private final Consumer<T> interceptor;
@@ -165,10 +164,26 @@ public class FixtureGeneratorConfigurator {
         }
 
         @Override
-        public void accept(Object value) {
+        public Object apply(Object value) {
             if (value != null && value.getClass().equals(type)) {
                 interceptor.accept(type.cast(value));
             }
+            return value;
+        }
+    }
+
+    private static class UntypedInterceptor implements Function<Object, Object> {
+
+        private final Consumer<Object> interceptor;
+
+        public UntypedInterceptor(Consumer<Object> interceptor) {
+            this.interceptor = interceptor;
+        }
+
+        @Override
+        public Object apply(Object value) {
+            interceptor.accept(value);
+            return value;
         }
     }
 }

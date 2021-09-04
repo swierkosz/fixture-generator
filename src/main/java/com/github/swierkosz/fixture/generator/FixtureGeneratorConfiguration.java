@@ -30,13 +30,11 @@ import com.github.swierkosz.fixture.generator.values.UUIDValueGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class FixtureGeneratorConfiguration {
 
     private final Collection<ValueGenerator> generators = new ArrayList<>();
-    private final Collection<Consumer<Object>> interceptors = new ArrayList<>();
     private final Collection<Function<Object, Object>> transformers = new ArrayList<>();
     private boolean ignoreCyclicReferences;
     private boolean ignoreNoValue;
@@ -75,14 +73,6 @@ public class FixtureGeneratorConfiguration {
 
     public void setIgnoreNoValue(boolean ignoreNoValue) {
         this.ignoreNoValue = ignoreNoValue;
-    }
-
-    public Collection<Consumer<Object>> getInterceptors() {
-        return interceptors;
-    }
-
-    public void addInterceptor(Consumer<Object> interceptor) {
-        interceptors.add(interceptor);
     }
 
     public Collection<Function<Object, Object>> getTransformers() {

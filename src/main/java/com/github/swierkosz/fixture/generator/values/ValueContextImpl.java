@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
@@ -94,9 +93,6 @@ public class ValueContextImpl implements ValueContext {
         Object value = generate(valueContext);
         for (Function<Object, Object> transformer : configuration.getTransformers()) {
             value = transformer.apply(value);
-        }
-        for (Consumer<Object> interceptor : configuration.getInterceptors()) {
-            interceptor.accept(value);
         }
         return value;
     }

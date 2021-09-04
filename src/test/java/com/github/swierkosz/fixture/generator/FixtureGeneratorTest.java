@@ -568,10 +568,27 @@ class FixtureGeneratorTest {
     }
 
     @Test
-    void shouldIntercept() {
+    void shouldInterceptWithType() {
         // Given
         fixtureGenerator.configure()
                 .intercept(TestClassWithMiscTypes.class, value -> value.stringField = "my custom string");
+
+        // When
+        TestClassWithMiscTypes result = fixtureGenerator.createDeterministic(TestClassWithMiscTypes.class);
+
+        // Then
+        assertThat(result.stringField).isEqualTo("my custom string");
+    }
+
+    @Test
+    void shouldInterceptWithoutType() {
+        // Given
+        fixtureGenerator.configure()
+                .intercept(value -> {
+                    if (value instanceof TestClassWithMiscTypes) {
+                        ((TestClassWithMiscTypes) value).stringField = "my custom string";
+                    }
+                });
 
         // When
         TestClassWithMiscTypes result = fixtureGenerator.createDeterministic(TestClassWithMiscTypes.class);
