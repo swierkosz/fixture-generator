@@ -39,7 +39,9 @@ public class ConstructingValueGenerator implements ValueGenerator {
         if (result == null) {
             return NO_VALUE;
         }
-
+        if (type.getRawType().getSuperclass().getName().equals("java.lang.Record")) {
+            return result;
+        }
         for (FieldInformation field : classInspector.listFieldsFor(type)) {
             field.getSetter().accept(result, valueContext.create(field.getName(), field.getType()));
         }
@@ -53,10 +55,11 @@ public class ConstructingValueGenerator implements ValueGenerator {
         for (ConstructorInformation constructor : constructors) {
             try {
                 List<TypeInformation> parameterTypes = constructor.getParameterTypes();
+                List<String> parameterNames = constructor.getParameterNames();
                 Object[] args = new Object[parameterTypes.size()];
                 int index = 0;
                 for (TypeInformation parameterType : parameterTypes) {
-                    args[index] = valueContext.create(null, parameterType);
+                    args[index] = valueContext.create(parameterNames.get(index), parameterType);
                     index++;
                 }
 

@@ -21,14 +21,18 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Collections.unmodifiableList;
+
 public class ConstructorInformation {
 
     private final Constructor<?> constructor;
     private final List<TypeInformation> parameterTypes;
+    private final List<String> parameterNames;
 
-    public ConstructorInformation(Constructor<?> constructor, List<TypeInformation> parameterTypes) {
+    public ConstructorInformation(Constructor<?> constructor, List<TypeInformation> parameterTypes, List<String> parameterNames) {
         this.constructor = constructor;
-        this.parameterTypes = parameterTypes;
+        this.parameterTypes = unmodifiableList(parameterTypes);
+        this.parameterNames = unmodifiableList(parameterNames);
     }
 
     public Constructor<?> getConstructor() {
@@ -37,6 +41,10 @@ public class ConstructorInformation {
 
     public List<TypeInformation> getParameterTypes() {
         return parameterTypes;
+    }
+
+    public List<String> getParameterNames() {
+        return parameterNames;
     }
 
     @Override
@@ -48,12 +56,14 @@ public class ConstructorInformation {
             return false;
         }
         ConstructorInformation that = (ConstructorInformation) o;
-        return Objects.equals(constructor, that.constructor) && Objects.equals(parameterTypes, that.parameterTypes);
+        return Objects.equals(constructor, that.constructor)
+                && Objects.equals(parameterTypes, that.parameterTypes)
+                && Objects.equals(parameterNames, that.parameterNames);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(constructor, parameterTypes);
+        return Objects.hash(constructor, parameterTypes, parameterNames);
     }
 
     @Override
@@ -61,6 +71,7 @@ public class ConstructorInformation {
         return "ConstructorInformation{" +
                 "constructor=" + constructor +
                 ", parameterTypes=" + parameterTypes +
+                ", parameterNames=" + parameterNames +
                 '}';
     }
 }

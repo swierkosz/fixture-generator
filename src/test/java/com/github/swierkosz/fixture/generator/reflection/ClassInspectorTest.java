@@ -192,6 +192,7 @@ class ClassInspectorTest {
         assertThat(result).hasSize(1);
         ConstructorInformation constructorInformation = result.get(0);
         assertThat(constructorInformation.getParameterTypes()).isEmpty();
+        assertThat(constructorInformation.getParameterNames()).isEmpty();
 
         // Given
         constructorInformation.getConstructor().setAccessible(true);
@@ -221,6 +222,7 @@ class ClassInspectorTest {
         assertThat(parameterTypes.get(0)).isEqualTo(typeInformation(int.class));
         assertThat(parameterTypes.get(1)).isEqualTo(typeInformation(String.class));
         assertThat(parameterTypes.get(2)).isEqualTo(typeInformation(Set.class, typeInformation(String.class)));
+        assertThat(constructorInformation.getParameterNames()).containsExactly("arg0", "arg1", "arg2");
     }
 
     static Stream<Arguments> shouldListConstructorsForClassWithoutDefaultConstructorSource() {

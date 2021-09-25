@@ -486,6 +486,22 @@ class FixtureGeneratorTest {
         assertThat(result.testField.list).containsExactly(858912947, -709195832, -1953750246);
     }
 
+/* FIXME: Test is commented out, because I did not set up maven build to run tests under java 17
+
+    private static record TestRecord(String name, String address) {
+    }
+
+    @Test
+    void shouldCreateRecord() {
+        // When
+        TestRecord result = fixtureGenerator.createDeterministic(TestRecord.class);
+
+        // Then
+        assertThat(result.name()).isEqualTo("name-4db11361-7395-3a23-ab85-f89277e25541");
+        assertThat(result.address()).isEqualTo("address-3e556675-aaa3-33f3-a317-9370a46f2592");
+    }
+*/
+
     private static class TestClassWithoutDefaultConstructor {
         final TestClassWithGenericsAndWithoutDefaultConstructor<Integer> testField;
 
