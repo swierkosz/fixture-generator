@@ -40,7 +40,7 @@ class ExtendedRandomTest {
         for (int i = 0; i < 1000; i++) {
             int result = extendedRandom.randomOneOf(array);
 
-            assertThat(result).isIn(array);
+            assertThat(result).isIn((Object[]) array);
             results.add(result);
         }
 
