@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,6 +14,11 @@ package com.github.swierkosz.fixture.generator;
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
+import com.github.swierkosz.fixture.generator.transformers.TypedInterceptor;
+import com.github.swierkosz.fixture.generator.transformers.TypedTransformer;
+import com.github.swierkosz.fixture.generator.transformers.UntypedInterceptor;
+import com.github.swierkosz.fixture.generator.values.SubclassValueGenerator;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -125,6 +130,40 @@ public class FixtureGeneratorConfigurator {
     }
 
     /**
+     * Registers a list of subclasses available for generation for a given base type.
+     *
+     * @param type            Specifies base type of the object to be generated.
+     * @param implementations List of subclasses to choose from when generating.
+     * @return configurator
+     */
+    public FixtureGeneratorConfigurator subclass(Class<?> type, Class<?>... implementations) {
+        return defineGenerator(type, new SubclassValueGenerator(type, implementations));
+    }
+
+    /**
+     * Registers a typed value generator that will be called for every request to generate an object of equal type.
+     *
+     * @param type      Specifies type of the object to generate.
+     * @param generator The generator to be called.
+     * @return configurator
+     */
+    public FixtureGeneratorConfigurator defineGenerator(Class<?> type, ValueGenerator generator) {
+        configuration.assignGenerator(type, generator);
+        return this;
+    }
+
+    /**
+     * Registers an untyped generator that will be called for every request to generate an object.
+     *
+     * @param generator The generator to be called.
+     * @return configurator
+     */
+    public FixtureGeneratorConfigurator defineGenerator(ValueGenerator generator) {
+        configuration.addGenerator(generator);
+        return this;
+    }
+
+    /**
      * Method for fluently finishing configuring of fixture generator.
      *
      * @return fixtureGenerator
@@ -133,57 +172,4 @@ public class FixtureGeneratorConfigurator {
         return fixtureGenerator;
     }
 
-    private static class TypedTransformer<T, U extends T> implements Function<Object, Object> {
-
-        private final Class<T> type;
-        private final Function<T, U> transformer;
-
-        public TypedTransformer(Class<T> type, Function<T, U> transformer) {
-            this.type = type;
-            this.transformer = transformer;
-        }
-
-        @Override
-        public Object apply(Object value) {
-            if (value != null && value.getClass().equals(type)) {
-                return transformer.apply(type.cast(value));
-            } else {
-                return value;
-            }
-        }
-    }
-
-    private static class TypedInterceptor<T> implements Function<Object, Object> {
-
-        private final Class<T> type;
-        private final Consumer<T> interceptor;
-
-        public TypedInterceptor(Class<T> type, Consumer<T> interceptor) {
-            this.type = type;
-            this.interceptor = interceptor;
-        }
-
-        @Override
-        public Object apply(Object value) {
-            if (value != null && value.getClass().equals(type)) {
-                interceptor.accept(type.cast(value));
-            }
-            return value;
-        }
-    }
-
-    private static class UntypedInterceptor implements Function<Object, Object> {
-
-        private final Consumer<Object> interceptor;
-
-        public UntypedInterceptor(Consumer<Object> interceptor) {
-            this.interceptor = interceptor;
-        }
-
-        @Override
-        public Object apply(Object value) {
-            interceptor.accept(value);
-            return value;
-        }
-    }
 }

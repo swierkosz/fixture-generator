@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package com.github.swierkosz.fixture.generator.values;
 import com.github.swierkosz.fixture.generator.TypeInformation;
 import com.github.swierkosz.fixture.generator.ValueContext;
 import com.github.swierkosz.fixture.generator.ValueGenerator;
-
-import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
 
 public class CharacterValueGenerator implements ValueGenerator {
 

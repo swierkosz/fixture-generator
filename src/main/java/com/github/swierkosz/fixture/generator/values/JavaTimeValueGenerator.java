@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -714,7 +714,7 @@ public class JavaTimeValueGenerator implements ValueGenerator {
             return TimeZone.getTimeZone(randomZoneId(random));
 
         } else {
-            return NoValue.NO_VALUE;
+            return NO_VALUE;
         }
     }
 

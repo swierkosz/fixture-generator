@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator;
 /*
- *    Copyright 2021 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -71,12 +71,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 class FixtureGeneratorTest {
 
-    private FixtureGenerator fixtureGenerator;
-
-    @BeforeEach
-    void setUp() {
-        fixtureGenerator = new FixtureGenerator();
-    }
+    private final FixtureGenerator fixtureGenerator = new FixtureGenerator();
 
     @Test
     void shouldCreateDeterministicTestClassWithPrimitiveFields() {
@@ -95,6 +90,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithPrimitiveFields {
+
         boolean booleanField;
         byte byteField;
         char characterField;
@@ -103,6 +99,7 @@ class FixtureGeneratorTest {
         long longField;
         float floatField;
         double doubleField;
+
     }
 
     @Test
@@ -122,6 +119,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithBoxedFields {
+
         Boolean booleanField;
         Byte byteField;
         Character characterField;
@@ -130,6 +128,7 @@ class FixtureGeneratorTest {
         Long longField;
         Float floatField;
         Double doubleField;
+
     }
 
     @Test
@@ -154,6 +153,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithArrays {
+
         boolean[] booleanArray;
         byte[] byteArray;
         char[] characterArray;
@@ -164,6 +164,7 @@ class FixtureGeneratorTest {
         double[] doubleArray;
         UUID[] uuidArray;
         byte[][] byte2dArray;
+
     }
 
     @Test
@@ -190,6 +191,7 @@ class FixtureGeneratorTest {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class TestClassWithMiscTypes {
+
         String stringField;
         BigDecimal bigDecimalField;
         BigInteger bigIntegerField;
@@ -202,6 +204,7 @@ class FixtureGeneratorTest {
         OptionalInt optionalInt;
         OptionalLong optionalLong;
         OptionalDouble optionalDouble;
+
     }
 
     private enum TestEnum {
@@ -218,7 +221,9 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithStaticFields {
+
         static String stringField;
+
     }
 
     @Test
@@ -238,13 +243,16 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithGenericFields extends TestClassBaseWithGenericFields<Integer> {
+
     }
 
     private static class TestClassBaseWithGenericFields<T> {
+
         long nonGenericField;
         T genericField;
         T[] genericArrayField;
         T[][] generic2dArrayField;
+
     }
 
     @Test
@@ -270,6 +278,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithCollections {
+
         Collection<Integer> collection;
         List<Integer> list;
         ArrayList<Integer> arrayList;
@@ -284,6 +293,7 @@ class FixtureGeneratorTest {
         Deque<Integer> deque;
         Vector<Integer> vector;
         Stack<Integer> stack;
+
     }
 
     @Test
@@ -313,6 +323,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassBaseWithGenericCollections<T> {
+
         Collection<T> collection;
         List<T> list;
         ArrayList<T> arrayList;
@@ -327,6 +338,7 @@ class FixtureGeneratorTest {
         Deque<T> deque;
         Vector<T> vector;
         Stack<T> stack;
+
     }
 
     @Test
@@ -380,6 +392,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassBaseWithGenericMaps<K, V> {
+
         Map<K, V> map;
         SortedMap<K, V> sortedMap;
         NavigableMap<K, V> navigableMap;
@@ -387,6 +400,7 @@ class FixtureGeneratorTest {
         LinkedHashMap<K, V> linkedHashMap;
         Hashtable<K, V> hashtable;
         TreeMap<K, V> treeMap;
+
     }
 
     @Test
@@ -402,17 +416,23 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithDeepGenerics {
+
         TestClassWithDeepGenericsInner2<Set<Integer>, Integer> inner;
+
     }
 
     private static class TestClassWithDeepGenericsInner2<A, B> extends TestClassWithDeepGenericsInner1<B, A> {
+
         A field3;
         B field4;
+
     }
 
     private static class TestClassWithDeepGenericsInner1<A, B> {
+
         A field1;
         B field2;
+
     }
 
     @Test
@@ -438,6 +458,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithJavaTimeClasses {
+
         Duration duration;
         Instant instant;
         LocalDate localDate;
@@ -452,6 +473,7 @@ class FixtureGeneratorTest {
         ZonedDateTime zonedDateTime;
         ZoneId zoneId;
         ZoneOffset zoneOffset;
+
     }
 
     @Test
@@ -466,6 +488,7 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithFinalFieldsAndWithoutDefaultConstructor {
+
         final int intField;
         final String stringField;
         final Set<Integer> setField;
@@ -475,6 +498,7 @@ class FixtureGeneratorTest {
             this.stringField = stringField;
             this.setField = setField;
         }
+
     }
 
     @Test
@@ -503,19 +527,23 @@ class FixtureGeneratorTest {
 */
 
     private static class TestClassWithoutDefaultConstructor {
+
         final TestClassWithGenericsAndWithoutDefaultConstructor<Integer> testField;
 
         private TestClassWithoutDefaultConstructor(TestClassWithGenericsAndWithoutDefaultConstructor<Integer> testField) {
             this.testField = testField;
         }
+
     }
 
     private static class TestClassWithGenericsAndWithoutDefaultConstructor<T> {
+
         final List<T> list;
 
         private TestClassWithGenericsAndWithoutDefaultConstructor(List<T> list) {
             this.list = list;
         }
+
     }
 
     @Test
@@ -544,11 +572,15 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithCyclicReferenceA {
+
         TestClassWithCyclicReferenceB cyclicReference;
+
     }
 
     private static class TestClassWithCyclicReferenceB {
+
         TestClassWithCyclicReferenceA cyclicReference;
+
     }
 
     @Test
@@ -576,7 +608,9 @@ class FixtureGeneratorTest {
     }
 
     private static class TestClassWithNoValue {
+
         InterfaceWithNoImplementation fieldWithNoValue;
+
     }
 
     interface InterfaceWithNoImplementation {
@@ -626,6 +660,63 @@ class FixtureGeneratorTest {
         assertThat(result.instant).isEqualTo(Instant.parse("1976-03-31T08:48:06Z"));
     }
 
+    interface TestInterface {
+
+    }
+
+    private static class TestClassImplementingInterface1 implements TestInterface {
+
+        String stringField;
+
+    }
+
+    private static class TestClassImplementingInterface2 implements TestInterface {
+
+        int intField;
+
+    }
+
+    @Test
+    void shouldSubclass() {
+        // Given
+        fixtureGenerator.configure()
+                .subclass(TestInterface.class, TestClassImplementingInterface1.class, TestClassImplementingInterface2.class);
+
+        // When
+        TestInterface result = fixtureGenerator.createDeterministic(TestInterface.class);
+
+        // Then
+        assertThat(result).isInstanceOf(TestClassImplementingInterface1.class);
+        TestClassImplementingInterface1 testClass = (TestClassImplementingInterface1) result;
+        assertThat(testClass.stringField).isNotNull();
+    }
+
+    @Test
+    void shouldDefineGeneratorWithType() {
+        // Given
+        fixtureGenerator.configure()
+                .defineGenerator(long.class, valueContext -> 42L);
+
+        // When
+        Long result = fixtureGenerator.createRandomized(long.class);
+
+        // Then
+        assertThat(result).isEqualTo(42);
+    }
+
+    @Test
+    void shouldDefineGeneratorWithoutType() {
+        // Given
+        fixtureGenerator.configure()
+                .defineGenerator(valueContext -> "Strings everywhere");
+
+        // When
+        Object result = fixtureGenerator.createRandomized(Object.class);
+
+        // Then
+        assertThat(result).isEqualTo("Strings everywhere");
+    }
+
     @Test
     void shouldCreateRandomized() {
         // Given
@@ -649,4 +740,5 @@ class FixtureGeneratorTest {
         // Then
         assertThat(result).isSameAs(fixtureGenerator);
     }
+
 }

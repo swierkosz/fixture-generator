@@ -1,4 +1,4 @@
-package com.github.swierkosz.fixture.generator;
+package com.github.swierkosz.fixture.generator.transformers;
 /*
  *    Copyright 2023 Szymon Świerkosz
  *
@@ -15,15 +15,23 @@ package com.github.swierkosz.fixture.generator;
  *    limitations under the License.
  */
 
-import com.github.swierkosz.fixture.generator.values.NoValue;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public interface ValueGenerator {
+import static java.util.Objects.requireNonNull;
 
-    /**
-     * A marker object that can be returned in case ValueGenerator was unable to handle generation request.
-     */
-    NoValue NO_VALUE = NoValue.NO_VALUE;
+public class UntypedInterceptor implements Function<Object, Object> {
 
-    Object generateValue(ValueContext valueContext);
+    private final Consumer<Object> interceptor;
+
+    public UntypedInterceptor(Consumer<Object> interceptor) {
+        this.interceptor = requireNonNull(interceptor, "'interceptor' must not be null");
+    }
+
+    @Override
+    public Object apply(Object value) {
+        interceptor.accept(value);
+        return value;
+    }
 
 }

@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.github.swierkosz.fixture.generator.values.BooleanValueGenerator;
 import com.github.swierkosz.fixture.generator.values.CharacterValueGenerator;
 import com.github.swierkosz.fixture.generator.values.CollectionValueGenerator;
 import com.github.swierkosz.fixture.generator.values.ConstructingValueGenerator;
+import com.github.swierkosz.fixture.generator.values.DelegatingValueGenerator;
 import com.github.swierkosz.fixture.generator.values.EnumValueGenerator;
 import com.github.swierkosz.fixture.generator.values.JavaTimeValueGenerator;
 import com.github.swierkosz.fixture.generator.values.MapValueGenerator;
@@ -30,16 +31,22 @@ import com.github.swierkosz.fixture.generator.values.UUIDValueGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
 
 public class FixtureGeneratorConfiguration {
 
-    private final Collection<ValueGenerator> generators = new ArrayList<>();
+    private final List<ValueGenerator> generators = new ArrayList<>();
     private final Collection<Function<Object, Object>> transformers = new ArrayList<>();
+    private final DelegatingValueGenerator delegatingValueGenerator = new DelegatingValueGenerator();
     private boolean ignoreCyclicReferences;
     private boolean ignoreNoValue;
 
     protected FixtureGeneratorConfiguration() {
+        generators.add(delegatingValueGenerator);
+
         generators.add(new ArrayValueGenerator());
         generators.add(new BooleanValueGenerator());
         generators.add(new CharacterValueGenerator());
@@ -80,6 +87,19 @@ public class FixtureGeneratorConfiguration {
     }
 
     public void addTransformer(Function<Object, Object> transformer) {
+        requireNonNull(transformer, "'transformer' must not be null");
         transformers.add(transformer);
     }
+
+    public void addGenerator(ValueGenerator generator) {
+        requireNonNull(generator, "'generator' must not be null");
+        generators.add(0, generator);
+    }
+
+    public void assignGenerator(Class<?> type, ValueGenerator generator) {
+        requireNonNull(type, "'type' must not be null");
+        requireNonNull(generator, "'generator' must not be null");
+        delegatingValueGenerator.assignGenerator(type, generator);
+    }
+
 }

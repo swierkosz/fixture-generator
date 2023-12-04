@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2021 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import com.github.swierkosz.fixture.generator.reflection.FieldInformation;
 
 import java.util.List;
 
-import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
 import static java.util.Comparator.comparing;
 
 public class ConstructingValueGenerator implements ValueGenerator {

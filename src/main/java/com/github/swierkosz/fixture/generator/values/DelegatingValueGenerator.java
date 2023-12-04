@@ -18,16 +18,26 @@ package com.github.swierkosz.fixture.generator.values;
 import com.github.swierkosz.fixture.generator.ValueContext;
 import com.github.swierkosz.fixture.generator.ValueGenerator;
 
-public class EnumValueGenerator implements ValueGenerator {
+import java.util.HashMap;
+import java.util.Map;
+
+public class DelegatingValueGenerator implements ValueGenerator {
+
+    private final Map<Class<?>, ValueGenerator> generators = new HashMap<>();
+
+    public void assignGenerator(Class<?> type, ValueGenerator generator) {
+        generators.put(type, generator);
+    }
 
     @Override
     public Object generateValue(ValueContext valueContext) {
-        Class<?> rawType = valueContext.getType().getRawType();
+        ValueGenerator generator = generators.get(valueContext.getType().getRawType());
 
-        if (rawType.isEnum()) {
-            return valueContext.getRandom().randomOneOf(rawType.getEnumConstants());
+        if (generator != null) {
+            return generator.generateValue(valueContext);
         } else {
             return NO_VALUE;
         }
     }
+
 }

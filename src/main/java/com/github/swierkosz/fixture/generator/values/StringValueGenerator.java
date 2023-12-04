@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2023 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import com.github.swierkosz.fixture.generator.ValueGenerator;
 import com.github.swierkosz.fixture.generator.reflection.TypeInformationImpl;
 
 import java.util.UUID;
-
-import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
 
 public class StringValueGenerator implements ValueGenerator {
 
