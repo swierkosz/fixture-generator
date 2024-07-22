@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2020 Szymon Świerkosz
+ *    Copyright 2024 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -107,6 +107,11 @@ public class ValueContextImpl implements ValueContext {
                     }
                 }
                 return handleNoValue(valueContext);
+            } catch (FixtureGenerationException e) {
+                // No need to wrap it, just propagate
+                throw e;
+            } catch (Exception e) {
+                throw new FixtureGenerationException("Exception was thrown during construction of: " + valueContext.getType().getRawType(), e);
             } finally {
                 typesUnderConstruction.remove(valueContext.getType());
             }
@@ -130,4 +135,5 @@ public class ValueContextImpl implements ValueContext {
             throw new FixtureGenerationException("Cyclic reference: " + valueContext.getType().getRawType());
         }
     }
+
 }

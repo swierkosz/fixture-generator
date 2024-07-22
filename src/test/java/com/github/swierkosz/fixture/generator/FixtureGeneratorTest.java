@@ -66,7 +66,7 @@ import java.util.UUID;
 import java.util.Vector;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.catchException;
 
 class FixtureGeneratorTest {
 
@@ -550,10 +550,10 @@ class FixtureGeneratorTest {
     @Test
     void shouldThrowExceptionForTestClassWithCyclicReferenceA() {
         // When
-        Throwable throwable = catchThrowable(() -> fixtureGenerator.createDeterministic(TestClassWithCyclicReferenceA.class));
+        Exception exception = catchException(() -> fixtureGenerator.createDeterministic(TestClassWithCyclicReferenceA.class));
 
         // Then
-        assertThat(throwable)
+        assertThat(exception)
                 .isInstanceOf(FixtureGenerationException.class)
                 .hasMessage("Cyclic reference: class com.github.swierkosz.fixture.generator.FixtureGeneratorTest$TestClassWithCyclicReferenceA");
     }
@@ -587,10 +587,10 @@ class FixtureGeneratorTest {
     @Test
     void shouldThrowExceptionForTestClassWithNoValue() {
         // When
-        Throwable throwable = catchThrowable(() -> fixtureGenerator.createDeterministic(TestClassWithNoValue.class));
+        Exception exception = catchException(() -> fixtureGenerator.createDeterministic(TestClassWithNoValue.class));
 
         // Then
-        assertThat(throwable)
+        assertThat(exception)
                 .isInstanceOf(FixtureGenerationException.class)
                 .hasMessage("Failed to construct: interface com.github.swierkosz.fixture.generator.FixtureGeneratorTest$InterfaceWithNoImplementation");
     }
@@ -740,6 +740,25 @@ class FixtureGeneratorTest {
 
         // Then
         assertThat(result).isSameAs(fixtureGenerator);
+    }
+
+    @Test
+    void shouldHandleExceptions() {
+        // Given
+        fixtureGenerator.configure()
+                .defineGenerator(valueContext -> {
+                    throw new RuntimeException("Something went wrong");
+                });
+
+        // When
+        Exception exception = catchException(() -> fixtureGenerator.createRandomized(Object.class));
+
+        // Then
+        assertThat(exception)
+                .isInstanceOf(FixtureGenerationException.class)
+                .hasMessage("Exception was thrown during construction of: class java.lang.Object")
+                .hasRootCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage("Something went wrong");
     }
 
 }
