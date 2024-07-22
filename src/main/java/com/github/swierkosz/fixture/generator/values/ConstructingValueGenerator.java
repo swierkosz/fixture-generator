@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator.values;
 /*
- *    Copyright 2023 Szymon Świerkosz
+ *    Copyright 2024 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class ConstructingValueGenerator implements ValueGenerator {
         if (result == null) {
             return NO_VALUE;
         }
-        if (type.getRawType().getSuperclass().getName().equals("java.lang.Record")) {
+        if (isRecord(type.getRawType())) {
             return result;
         }
         for (FieldInformation field : classInspector.listFieldsFor(type)) {
@@ -70,4 +70,10 @@ public class ConstructingValueGenerator implements ValueGenerator {
         }
         return null;
     }
+
+    private static boolean isRecord(Class<?> type) {
+        return type.getSuperclass() != null
+                && type.getSuperclass().getName().equals("java.lang.Record");
+    }
+
 }

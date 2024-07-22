@@ -1,6 +1,6 @@
 package com.github.swierkosz.fixture.generator;
 /*
- *    Copyright 2023 Szymon Świerkosz
+ *    Copyright 2024 Szymon Świerkosz
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@ package com.github.swierkosz.fixture.generator;
  *    limitations under the License.
  */
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -173,6 +172,7 @@ class FixtureGeneratorTest {
         TestClassWithMiscTypes result = fixtureGenerator.createDeterministic(TestClassWithMiscTypes.class);
 
         // Then
+        assertThat(result.objectField).isExactlyInstanceOf(Object.class);
         assertThat(result.stringField).isEqualTo("stringField-09568fd4-7072-3c1d-81dd-f383836cc584");
         assertThat(result.bigDecimalField).isEqualTo(new BigDecimal("-3688168203866324.5"));
         assertThat(result.bigIntegerField).isEqualTo(new BigInteger("-2942810233360991754"));
@@ -192,6 +192,7 @@ class FixtureGeneratorTest {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class TestClassWithMiscTypes {
 
+        Object objectField;
         String stringField;
         BigDecimal bigDecimalField;
         BigInteger bigIntegerField;
