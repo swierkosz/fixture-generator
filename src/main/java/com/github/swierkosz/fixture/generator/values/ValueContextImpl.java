@@ -24,11 +24,13 @@ import com.github.swierkosz.fixture.generator.util.ExtendedRandom;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.swierkosz.fixture.generator.values.NoValue.NO_VALUE;
 
@@ -42,10 +44,10 @@ public class ValueContextImpl implements ValueContext {
     private final Set<TypeInformation> typesUnderConstruction;
 
     public ValueContextImpl(FixtureGeneratorConfiguration configuration, String fieldName, TypeInformation type, int seed) {
-        this(configuration, fieldName, type, seed, new HashSet<>());
+        this(configuration, fieldName, type, seed, new LinkedHashSet<>());
     }
 
-    public ValueContextImpl(FixtureGeneratorConfiguration configuration, String fieldName, TypeInformation type, int seed, Set<TypeInformation> typesUnderConstruction) {
+    private ValueContextImpl(FixtureGeneratorConfiguration configuration, String fieldName, TypeInformation type, int seed, Set<TypeInformation> typesUnderConstruction) {
         this.configuration = configuration;
         this.fieldName = fieldName;
         this.type = type;
@@ -124,7 +126,7 @@ public class ValueContextImpl implements ValueContext {
         if (configuration.isIgnoreNoValue()) {
             return null;
         } else {
-            throw new FixtureGenerationException("Failed to construct: " + valueContext.getType().getRawType());
+            throw new FixtureGenerationException("Failed to construct: " + valueContext.getType().getRawType() + getCallTrace(true));
         }
     }
 
@@ -132,7 +134,33 @@ public class ValueContextImpl implements ValueContext {
         if (configuration.isIgnoreCyclicReferences()) {
             return null;
         } else {
-            throw new FixtureGenerationException("Cyclic reference: " + valueContext.getType().getRawType());
+            throw new FixtureGenerationException("Cyclic reference starting with: " + valueContext.getType().getRawType() + getCallTrace(false));
+        }
+    }
+
+    private String getCallTrace(boolean skipLast) {
+        List<TypeInformation> types = new ArrayList<>(typesUnderConstruction);
+        if (skipLast) {
+            types.remove(types.size() - 1);
+        }
+        if (types.isEmpty()) {
+            return "";
+        } else {
+            Collections.reverse(types);
+            return types.stream()
+                    .map(ValueContextImpl::formatTypeIdentifier)
+                    .collect(Collectors.joining(" <- ", " <- ", ""));
+        }
+    }
+
+    private static String formatTypeIdentifier(TypeInformation typeInformation) {
+        String simpleName = typeInformation.getRawType().getSimpleName();
+        if (typeInformation.getTypeParameters().isEmpty() || typeInformation.getRawType().isArray()) {
+            return simpleName;
+        } else {
+            return typeInformation.getTypeParameters().stream()
+                    .map(ValueContextImpl::formatTypeIdentifier)
+                    .collect(Collectors.joining(", ", simpleName + "<", ">"));
         }
     }
 

@@ -555,7 +555,7 @@ class FixtureGeneratorTest {
         // Then
         assertThat(exception)
                 .isInstanceOf(FixtureGenerationException.class)
-                .hasMessage("Cyclic reference: class com.github.swierkosz.fixture.generator.FixtureGeneratorTest$TestClassWithCyclicReferenceA");
+                .hasMessage("Cyclic reference starting with: class com.github.swierkosz.fixture.generator.FixtureGeneratorTest$TestClassWithCyclicReferenceB <- TestClassWithCyclicReferenceC <- List<TestClassWithCyclicReferenceC> <- TestClassWithCyclicReferenceB <- TestClassWithCyclicReferenceB[] <- TestClassWithCyclicReferenceA");
     }
 
     @Test
@@ -568,26 +568,44 @@ class FixtureGeneratorTest {
         TestClassWithCyclicReferenceA result = fixtureGenerator.createDeterministic(TestClassWithCyclicReferenceA.class);
 
         // Then
-        assertThat(result.cyclicReference).isNotNull();
-        assertThat(result.cyclicReference.cyclicReference).isNull();
+        assertThat(result.referencesToB).isNotNull();
+        assertThat(result.referencesToB[0].referencesToC).isNotNull();
+        assertThat(result.referencesToB[0].referencesToC.get(0).referenceToB).isNull();
     }
 
     private static class TestClassWithCyclicReferenceA {
 
-        TestClassWithCyclicReferenceB cyclicReference;
+        TestClassWithCyclicReferenceB[] referencesToB;
 
     }
 
     private static class TestClassWithCyclicReferenceB {
 
-        TestClassWithCyclicReferenceA cyclicReference;
+        List<TestClassWithCyclicReferenceC> referencesToC;
+
+    }
+
+    private static class TestClassWithCyclicReferenceC {
+
+        TestClassWithCyclicReferenceB referenceToB;
 
     }
 
     @Test
-    void shouldThrowExceptionForTestClassWithNoValue() {
+    void shouldThrowExceptionForTestClassWithNoValueWithCallTrace() {
         // When
         Exception exception = catchException(() -> fixtureGenerator.createDeterministic(TestClassWithNoValue.class));
+
+        // Then
+        assertThat(exception)
+                .isInstanceOf(FixtureGenerationException.class)
+                .hasMessage("Failed to construct: interface com.github.swierkosz.fixture.generator.FixtureGeneratorTest$InterfaceWithNoImplementation <- TestClassWithNoValue");
+    }
+
+    @Test
+    void shouldThrowExceptionForTestClassWithNoValueWithoutCallTrace() {
+        // When
+        Exception exception = catchException(() -> fixtureGenerator.createDeterministic(InterfaceWithNoImplementation.class));
 
         // Then
         assertThat(exception)
